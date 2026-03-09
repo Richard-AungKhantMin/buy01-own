@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: media-service
+  
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: mongodb://admin:admin123@localhost:27017/media_db?authSource=admin
+      auto-index-creation: true
+  
+  # File Upload Configuration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 10MB
+  
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: media-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+
+server:
+  port: 8083
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+# File Storage Configuration
+file:
+  upload-dir: ./uploads
+  max-size: 2097152  # 2 MB in bytes
+  allowed-types:
+    - image/jpeg
+    - image/jpg
+    - image/png
+    - image/gif
+    - image/webp
+
+# Kafka Topics
+kafka:
+  topics:
+    image-uploaded: image-uploaded
+    image-deleted: image-deleted
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging Configuration
+logging:
+  level:
+    com.ecommerce.media: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.kafka: INFO
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
